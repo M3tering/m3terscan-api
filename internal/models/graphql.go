@@ -13,7 +13,7 @@ type DataStruct struct {
 	} `json:"meterDataPoints"`
 }
 
-type DailyReqStruct struct {
+type ReqStruct struct {
 	MeterDataPoints []struct {
 		Node struct {
 			Timestamp int64 `json:"timestamp"`

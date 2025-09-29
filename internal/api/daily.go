@@ -37,7 +37,7 @@ func GetDaily(ctx *gin.Context) {
 	req.Var("meterNumber", idInt)
 	req.Header.Set("Cache-Control", "no-cache")
 
-	var resp models.DailyReqStruct
+	var resp models.ReqStruct
 	if err := subgraph.Client.Run(ctx, req, &resp); err != nil {
 		log.Printf("GraphQL error for meter %d: %v", idInt, err)
 		ctx.JSON(500, gin.H{"error": "Failed to fetch meter data"})

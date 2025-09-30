@@ -9,11 +9,11 @@ import (
 )
 
 // Convert [6]byte -> uint64
-func Bytes6ToUint64(b [6]byte) uint64 {
+func Bytes6ToInt64(b [6]byte) int64 {
 	// Pad to 8 bytes
 	var buf [8]byte
 	copy(buf[2:], b[:]) // left-pad with 0s, put b in the last 6 slots
-	return binary.BigEndian.Uint64(buf[:])
+	return int64(binary.BigEndian.Uint64(buf[:]))
 }
 
 // Convert [6]byte -> *big.Int (safer if nonce can be large)
@@ -61,7 +61,8 @@ func NonceRange(startNonce, endNonce int) []int {
 
 	out := make([]int, length)
 	for i := range length {
-		out[i] = startNonce + i
+		val := max(startNonce+i, 0)
+		out[i] = val
 	}
 	return out
 }

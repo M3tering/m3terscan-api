@@ -58,16 +58,11 @@ func GetWeekly(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	latestNonceInt := util.Bytes6ToUint64(latestNonceBytes)
-	var startNonce uint64
-	if latestNonceInt > uint64(interval) {
-		startNonce = latestNonceInt - uint64(interval)
-	} else {
-		startNonce = 1
-	}
+	latestNonceInt := util.Bytes6ToInt64(latestNonceBytes)
+	startNonce := int64(latestNonceInt) - int64(interval)
 	totalDays := util.DaysInYearUntil(yearInt)
 	nonceMove := totalDays * 96
-	endNonce := min(latestNonceInt, startNonce+uint64(nonceMove))
+	endNonce := min(latestNonceInt, startNonce+int64(nonceMove))
 	if startNonce > endNonce {
 		log.Println("Invalid nonce range: startNonce > endNonce")
 		ctx.JSON(400, gin.H{"error": "Invalid nonce range: startNonce > endNonce"})

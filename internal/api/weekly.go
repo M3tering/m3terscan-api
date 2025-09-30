@@ -60,7 +60,7 @@ func GetWeekly(ctx *gin.Context) {
 	}
 	latestNonceInt := util.Bytes6ToInt64(latestNonceBytes)
 	startNonce := int64(latestNonceInt) - int64(interval)
-	totalDays := util.DaysInYearUntil(yearInt)
+	totalDays := util.DaysUntil(yearInt, nil)
 	nonceMove := totalDays * 96
 	endNonce := min(latestNonceInt, startNonce+int64(nonceMove))
 	if startNonce > endNonce {
@@ -90,6 +90,7 @@ func GetWeekly(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": "Failed to fetch data"})
 		return
 	}
+
 	data := util.GroupByWeek(resp)
 	ctx.JSON(200, gin.H{"data": data})
 }

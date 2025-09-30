@@ -16,6 +16,7 @@ func main() {
 	})
 	router.GET("/m3ter/:id/daily", api.GetDaily)
 	router.GET("/m3ter/:id/weekly", api.GetWeekly)
+	router.GET("/m3ter/:id/monthly", api.GetMonthly)
 
 	router.Run() // listens on 0.0.0.0:8080 by default
 }

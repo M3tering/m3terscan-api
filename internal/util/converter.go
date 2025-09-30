@@ -3,7 +3,6 @@ package util
 import (
 	"encoding/binary"
 	"fmt"
-	"m3terscan-api/internal/models"
 	"math/big"
 	"time"
 )
@@ -33,19 +32,22 @@ func GetQuarterHoursSinceYear(year int) (int64, error) {
 	return diff / 900, nil            // 900 seconds = 15 minutes
 }
 
-func DaysInYearUntil(year int) int {
+func DaysUntil(year int, month *int) int {
+	val := 12
 	now := time.Now()
 	currentYear := now.Year()
 
 	// startDate = Jan 1 of supplied year
 	startDate := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
-
+	if month != nil {
+		val = *month
+	}
 	var stopDate time.Time
 	if year == currentYear {
 		stopDate = now
 	} else {
 		// End of supplied year = Dec 31, 23:59:59
-		stopDate = time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+		stopDate = time.Date(year, time.Month(val), 31, 23, 59, 59, 0, time.UTC)
 	}
 
 	// inclusive days
@@ -65,59 +67,4 @@ func NonceRange(startNonce, endNonce int) []int {
 		out[i] = val
 	}
 	return out
-}
-
-func GroupByWeek(data models.ReqStruct) [][]models.WeeklyResponse {
-	grouped := make([][]struct {
-		Node struct {
-			Timestamp int64 `json:"timestamp"`
-			Payload   struct {
-				Energy float64 `json:"energy"`
-			} `json:"payload"`
-		} `json:"node"`
-	}, 52)
-
-	// group items by week
-	for _, item := range data.MeterDataPoints {
-		ts := item.Node.Timestamp
-		if ts == 0 {
-			continue
-		}
-
-		// convert ms to time.Time
-		d := time.UnixMilli(ts)
-		_, week := d.ISOWeek()
-		if week >= 1 && week <= 52 {
-			grouped[week-1] = append(grouped[week-1], item)
-		}
-	}
-
-	// build 52 weeks
-	weeks := make([]models.WeeklyResponse, 52)
-	for i, items := range grouped {
-		if len(items) == 0 {
-			weeks[i] = models.WeeklyResponse{TotalEnergy: 0, Week: i + 1}
-			continue
-		}
-
-		var totalEnergy float64
-		for _, it := range items {
-			totalEnergy += it.Node.Payload.Energy
-		}
-
-		d := time.UnixMilli(items[0].Node.Timestamp)
-		_, week := d.ISOWeek()
-
-		weeks[i] = models.WeeklyResponse{TotalEnergy: totalEnergy, Week: week}
-	}
-
-	// split into 4 quarters of 13 weeks
-	final := make([][]models.WeeklyResponse, 4)
-	for q := range 4 {
-		start := q * 13
-		end := start + 13
-		final[q] = weeks[start:end]
-	}
-
-	return final
 }

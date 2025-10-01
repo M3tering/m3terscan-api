@@ -18,9 +18,22 @@ func GetActivities(ctx *gin.Context) {
 		return
 	}
 
+	// query params: limit, after
+	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "10"))
+	if limit < 1 {
+		limit = 10
+	}
+	after := ctx.Query("after") // optional cursor
+
 	req := graphql.NewRequest(`
-		query ExampleQuery($meterNumber: Int!) {
-			meterDataPoints(meterNumber: $meterNumber, first: 10, sortBy: HEIGHT_DESC) {
+		query ExampleQuery($meterNumber: Int!, $first: Int!, $after: String) {
+			meterDataPoints(
+				meterNumber: $meterNumber,
+				first: $first,
+				after: $after,
+				sortBy: HEIGHT_DESC
+			) {
+				cursor
 				node {
 					timestamp
 					payload {
@@ -32,8 +45,16 @@ func GetActivities(ctx *gin.Context) {
 		}
 	`)
 	req.Var("meterNumber", idInt)
+	req.Var("first", limit)
+	if after != "" {
+		req.Var("after", after)
+	} else {
+		req.Var("after", nil)
+	}
 
+	// Response struct must match GraphQL query
 	var resp models.ActivityReqStruct
+
 	if err := subgraph.Client.Run(ctx, req, &resp); err != nil {
 		log.Printf("GraphQL error for meter %d: %v", idInt, err)
 		ctx.JSON(500, gin.H{"error": "Failed to fetch meter data"})
@@ -42,13 +63,22 @@ func GetActivities(ctx *gin.Context) {
 
 	// Map to []ActivityResponse
 	var activities []models.ActivityResponse
-	for _, item := range resp.MeterDataPoints {
+	var nextCursor string
+	for i, item := range resp.MeterDataPoints {
 		activities = append(activities, models.ActivityResponse{
-			Timestamp: item.Node.Timestamp,
+			Timestamp: int64(item.Node.Timestamp),
 			Energy:    item.Node.Payload.Energy,
 			Signature: item.Node.Payload.Signature,
 		})
+		// last cursor
+		if i == len(resp.MeterDataPoints)-1 {
+			nextCursor = item.Cursor
+		}
 	}
 
-	ctx.JSON(200, gin.H{"data": activities})
+	ctx.JSON(200, gin.H{
+		"data":       activities,
+		"limit":      limit,
+		"nextCursor": nextCursor,
+	})
 }

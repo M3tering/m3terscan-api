@@ -26,7 +26,8 @@ type ReqStruct struct {
 
 type ActivityReqStruct struct {
 	MeterDataPoints []struct {
-		Node struct {
+		Cursor string `json:"cursor"`
+		Node   struct {
 			Timestamp int64 `json:"timestamp"`
 			Payload   struct {
 				Energy    float64 `json:"energy"`

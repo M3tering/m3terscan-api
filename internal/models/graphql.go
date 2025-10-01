@@ -23,3 +23,15 @@ type ReqStruct struct {
 		} `json:"node"`
 	} `json:"meterDataPoints"`
 }
+
+type ActivityReqStruct struct {
+	MeterDataPoints []struct {
+		Node struct {
+			Timestamp int64 `json:"timestamp"`
+			Payload   struct {
+				Energy    float64 `json:"energy"`
+				Signature string  `json:"signature"`
+			} `json:"payload"`
+		} `json:"node"`
+	} `json:"meterDataPoints"`
+}

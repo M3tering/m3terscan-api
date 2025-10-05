@@ -105,19 +105,22 @@ func HexToChunks(hexStr string, chunkSize int) ([]*big.Int, error) {
 	return chunks, nil
 }
 
-func CombineAccountsNonces(accounts, nonces []*big.Int) []models.StateResponse {
+func CombineAccountsNonces(accounts, nonces []*big.Int) ([]models.StateResponse, error) {
 	if len(accounts) != len(nonces) {
-		panic("accounts and nonces must have the same length")
+		return nil, fmt.Errorf("accounts and nonces must have the same length")
 	}
 
+	divisor := big.NewInt(1000000)
 	result := make([]models.StateResponse, len(accounts))
+
 	for i := range accounts {
+		accountValue := new(big.Int).Div(accounts[i], divisor)
 		result[i] = models.StateResponse{
 			M3terNo: i + 1,
-			Account: accounts[i],
+			Account: accountValue,
 			Nonce:   nonces[i],
 		}
 	}
 
-	return result
+	return result, nil
 }

@@ -70,8 +70,11 @@ func GetCommitState(ctx *gin.Context, client *ethclient.Client) {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	meters := util.CombineAccountsNonces(accounts, nonces)
-
+	meters, err := util.CombineAccountsNonces(accounts, nonces)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	ctx.JSON(200, gin.H{
 		"data": meters,
 	})

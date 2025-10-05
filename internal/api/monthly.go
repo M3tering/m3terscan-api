@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"log"
-	"m3terscan-api/internal/blockchain"
 	"m3terscan-api/internal/m3tering"
 	"m3terscan-api/internal/models"
 	"m3terscan-api/internal/subgraph"
@@ -13,11 +12,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gin-gonic/gin"
 	"github.com/machinebox/graphql"
 )
 
-func GetMonthly(ctx *gin.Context) {
+func GetMonthly(ctx *gin.Context, client *ethclient.Client) {
 	id := ctx.Param("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
@@ -51,11 +51,7 @@ func GetMonthly(ctx *gin.Context) {
 		return
 	}
 	contractAddress := common.HexToAddress("0xf8f2d4315DB5db38f3e5c45D0bCd59959c603d9b")
-	client, err := blockchain.GetClient()
-	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
+
 	instance, err := m3tering.NewM3tering(contractAddress, client)
 	if err != nil {
 		log.Println(err)

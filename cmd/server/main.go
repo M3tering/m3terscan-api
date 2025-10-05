@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"m3terscan-api/internal/api"
+	"m3terscan-api/internal/blockchain"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -10,6 +12,11 @@ import (
 
 func main() {
 	router := gin.Default()
+	client, err := blockchain.GetClient()
+	if err != nil {
+		log.Fatal("Failed to initialize client:", err)
+	}
+	defer client.Close()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://ap-dashboard-kappa.vercel.app", "https://m3terscan-rr.vercel.app", "http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
@@ -25,7 +32,12 @@ func main() {
 	})
 	router.GET("/m3ter/:id/daily", api.GetDaily)
 	router.GET("/m3ter/:id/weekly", api.GetWeekly)
-	router.GET("/m3ter/:id/monthly", api.GetMonthly)
+	router.GET("/m3ter/:id/monthly", func(ctx *gin.Context) {
+		api.GetMonthly(ctx, client)
+	})
+	router.GET("/proposal", func(ctx *gin.Context) {
+		api.GetCommitState(ctx, client)
+	})
 	router.GET("m3ter/:id/activities", api.GetActivities)
 
 	router.Run() // listens on 0.0.0.0:8080 by default

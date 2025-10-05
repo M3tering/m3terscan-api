@@ -2,7 +2,9 @@ package util
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
+	"m3terscan-api/internal/models"
 	"math/big"
 	"time"
 )
@@ -67,4 +69,55 @@ func NonceRange(startNonce, endNonce int) []int {
 		out[i] = val
 	}
 	return out
+}
+
+func HexToChunks(hexStr string, chunkSize int) ([]*big.Int, error) {
+	if chunkSize <= 0 {
+		chunkSize = 6
+	}
+
+	// Remove "0x" prefix if present
+	if len(hexStr) >= 2 && hexStr[:2] == "0x" {
+		hexStr = hexStr[2:]
+	}
+
+	// Pad with leading "00"
+	hexStr = "00" + hexStr
+
+	chunks := []*big.Int{}
+	bytesData, err := hex.DecodeString(hexStr)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(bytesData); i += chunkSize {
+		end := i + chunkSize
+		if end > len(bytesData) {
+			end = len(bytesData)
+		}
+		part := bytesData[i:end]
+
+		// Convert to big.Int
+		num := new(big.Int).SetBytes(part)
+		chunks = append(chunks, num)
+	}
+
+	return chunks, nil
+}
+
+func CombineAccountsNonces(accounts, nonces []*big.Int) []models.StateResponse {
+	if len(accounts) != len(nonces) {
+		panic("accounts and nonces must have the same length")
+	}
+
+	result := make([]models.StateResponse, len(accounts))
+	for i := range accounts {
+		result[i] = models.StateResponse{
+			M3terNo: i + 1,
+			Account: accounts[i],
+			Nonce:   nonces[i],
+		}
+	}
+
+	return result
 }

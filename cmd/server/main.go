@@ -17,6 +17,7 @@ func main() {
 		log.Fatal("Failed to initialize client:", err)
 	}
 	defer client.Close()
+
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://ap-dashboard-kappa.vercel.app", "https://m3terscan-rr.vercel.app", "http://localhost:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},

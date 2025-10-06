@@ -2,10 +2,10 @@ package util
 
 import (
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"m3terscan-api/internal/models"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -71,56 +71,42 @@ func NonceRange(startNonce, endNonce int) []int {
 	return out
 }
 
-func HexToChunks(hexStr string, chunkSize int) ([]*big.Int, error) {
+func BytesToChunks(data []byte, chunkSize int) ([]*big.Int, error) {
 	if chunkSize <= 0 {
 		chunkSize = 6
 	}
-
-	// Remove "0x" prefix if present
-	if len(hexStr) >= 2 && hexStr[:2] == "0x" {
-		hexStr = hexStr[2:]
-	}
-
-	// Pad with leading "00"
-	hexStr = "00" + hexStr
-
-	chunks := []*big.Int{}
-	bytesData, err := hex.DecodeString(hexStr)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := 0; i < len(bytesData); i += chunkSize {
+	result := make([]*big.Int, 0, (len(data)+chunkSize-1)/chunkSize)
+	for i := 0; i < len(data); i += chunkSize {
 		end := i + chunkSize
-		if end > len(bytesData) {
-			end = len(bytesData)
+		if end > len(data) {
+			end = len(data)
 		}
-		part := bytesData[i:end]
-
-		// Convert to big.Int
-		num := new(big.Int).SetBytes(part)
-		chunks = append(chunks, num)
+		result = append(result, new(big.Int).SetBytes(data[i:end]))
 	}
-
-	return chunks, nil
+	return result, nil
 }
 
 func CombineAccountsNonces(accounts, nonces []*big.Int) ([]models.StateResponse, error) {
 	if len(accounts) != len(nonces) {
 		return nil, fmt.Errorf("accounts and nonces must have the same length")
 	}
-
-	divisor := big.NewInt(1000000)
 	result := make([]models.StateResponse, len(accounts))
-
+	decimals := big.NewInt(1_000_000) // 10^6
 	for i := range accounts {
-		accountValue := new(big.Int).Div(accounts[i], divisor)
+		intPart := new(big.Int).Div(accounts[i], decimals)
+		fracPart := new(big.Int).Mod(accounts[i], decimals)
 		result[i] = models.StateResponse{
 			M3terNo: i + 1,
-			Account: accountValue,
+			Account: fmt.Sprintf("%s.%06s", intPart.String(), padLeft(fracPart.String(), 6)),
 			Nonce:   nonces[i],
 		}
 	}
-
 	return result, nil
+}
+
+func padLeft(s string, width int) string {
+	if len(s) >= width {
+		return s
+	}
+	return strings.Repeat("0", width-len(s)) + s
 }

@@ -25,6 +25,6 @@ type ActivityResponse struct {
 
 type StateResponse struct {
 	M3terNo int      `json:"m3ter_no"`
-	Account *big.Int `json:"account"`
+	Account string   `json:"account"`
 	Nonce   *big.Int `json:"nonce"`
 }

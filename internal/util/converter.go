@@ -73,15 +73,24 @@ func NonceRange(startNonce, endNonce int) []int {
 
 func BytesToChunks(data []byte, chunkSize int) ([]*big.Int, error) {
 	if chunkSize <= 0 {
-		chunkSize = 6
+		return nil, fmt.Errorf("invalid chunk size")
 	}
+
+	// Prepend one zero byte to the entire slice before chunking
+	data = append([]byte{0x00}, data...)
+
 	result := make([]*big.Int, 0, (len(data)+chunkSize-1)/chunkSize)
+
 	for i := 0; i < len(data); i += chunkSize {
 		end := i + chunkSize
 		if end > len(data) {
 			end = len(data)
 		}
-		result = append(result, new(big.Int).SetBytes(data[i:end]))
+
+		part := data[i:end]
+
+		num := new(big.Int).SetBytes(part)
+		result = append(result, num)
 	}
 	return result, nil
 }

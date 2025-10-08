@@ -10,6 +10,18 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+// GetActivities godoc
+// @Summary      Get meter activities
+// @Description  Returns a paginated list of activities for a given meter
+// @Tags         activities
+// @Param        id          path      int     true  "Meter ID"
+// @Param        limit       query     int     false "Limit number of results" default(10)
+// @Param        after       query     string  false "Cursor for pagination"
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /activities/{id} [get]
 func GetActivities(ctx *gin.Context) {
 	id := ctx.Param("id")
 	idInt, err := strconv.Atoi(id)

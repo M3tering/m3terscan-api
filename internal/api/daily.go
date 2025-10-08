@@ -13,6 +13,16 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+// GetDaily godoc
+// @Summary      Get daily energy data for a meter
+// @Description  Returns hourly energy data for a given meter for the last 24 hours
+// @Tags         daily
+// @Param        id    path   int  true  "Meter ID"
+// @Produce      json
+// @Success      200  {array}   models.DailyResponseStruct
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /daily/{id} [get]
 func GetDaily(ctx *gin.Context) {
 	id := ctx.Param("id")
 	idInt, err := strconv.Atoi(id)

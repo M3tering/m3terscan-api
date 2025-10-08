@@ -17,6 +17,18 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+// GetMonthly godoc
+// @Summary      Get monthly energy data for a meter
+// @Description  Returns daily energy data for a given meter for a specific month and year
+// @Tags         monthly
+// @Param        id     path   int     true  "Meter ID"
+// @Param        year   query  int     true  "Year (e.g. 2025)"
+// @Param        month  query  int     true  "Month (1-12)"
+// @Produce      json
+// @Success      200  {array}  models.MonthlyResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /monthly/{id} [get]
 func GetMonthly(ctx *gin.Context, client *ethclient.Client) {
 	id := ctx.Param("id")
 	idInt, err := strconv.Atoi(id)

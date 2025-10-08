@@ -17,6 +17,17 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+// GetWeekly godoc
+// @Summary      Get weekly energy data for a meter
+// @Description  Returns daily energy data for a given meter for a specific year, grouped by week
+// @Tags         weekly
+// @Param        id     path   int     true  "Meter ID"
+// @Param        year   query  int     true  "Year (e.g. 2025)"
+// @Produce      json
+// @Success      200  {array}  []models.WeeklyResponse
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /weekly/{id} [get]
 func GetWeekly(ctx *gin.Context) {
 	id := ctx.Param("id")
 	idInt, err := strconv.Atoi(id)

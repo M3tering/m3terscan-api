@@ -4,4 +4,3 @@
 /psql
 sqlc-tutorial
 m3ters.db
-internal/api/schema.sql

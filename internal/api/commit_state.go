@@ -12,6 +12,7 @@ import (
 	"m3terscan-api/internal/util"
 	"math/big"
 	"strings"
+	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -20,11 +21,14 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var parsedABI abi.ABI
-var Db *sql.DB
+var (
+	parsedABI abi.ABI
+	Db        *sql.DB
+	initOnce  sync.Once
+)
 
-////go:embed schema.sql
-// var ddl string
+//go:embed schema.sql
+var ddl string
 
 func init() {
 	var err error
@@ -44,6 +48,12 @@ func init() {
 	}
 
 	log.Println("WAL mode enabled")
+	initOnce.Do(func() {
+		if _, err := Db.Exec(ddl); err != nil {
+			log.Fatalf("failed to initialize schema: %v", err)
+		}
+		log.Println("Schema initialized successfully")
+	})
 }
 
 // GetCommitState godoc
@@ -62,12 +72,6 @@ func GetCommitState(ctx *gin.Context, client *ethclient.Client) {
 		ctx.JSON(400, gin.H{"error": "Hash is required"})
 		return
 	}
-
-	// // Ensure schema exists (you should normally do this once, not per request)
-	// if _, err := db.ExecContext(ctx, ddl); err != nil {
-	// 	ctx.JSON(500, gin.H{"error": err.Error()})
-	// 	return
-	// }
 
 	queries := tutorial.New(Db)
 

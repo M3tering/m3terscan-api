@@ -105,7 +105,7 @@ func CombineAccountsNonces(accounts, nonces []*big.Int) ([]models.StateResponse,
 		intPart := new(big.Int).Div(accounts[i], decimals)
 		fracPart := new(big.Int).Mod(accounts[i], decimals)
 		result[i] = models.StateResponse{
-			M3terNo: i + 1,
+			M3terNo: i,
 			Account: fmt.Sprintf("%s.%06s", intPart.String(), padLeft(fracPart.String(), 6)),
 			Nonce:   nonces[i],
 		}

@@ -21,7 +21,7 @@ func main() {
 	defer api.Db.Close()
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://ap-dashboard-kappa.vercel.app", "https://m3terscan-rr.vercel.app", "http://localhost:5173"},
+		AllowOrigins:     []string{"https://ap-dashboard-kappa.vercel.app", "https://m3terscan-rr.vercel.app", "http://localhost:5173", "https://m3terscan.m3ter.ing"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
